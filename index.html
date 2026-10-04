@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher's Day Chocolate Cards</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Kalam:wght@400;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0f5c52;
+            --grid-color: rgba(255, 255, 255, 0.1);
+            --paper-color: #f7f5f0;
+            --text-dark: #1a1a1a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #111;
+            background-image: 
+                linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)),
+                url('public/muhammad-suheer-CUPksBEa.webp');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            font-family: 'Patrick Hand', cursive;
+            color: var(--text-dark);
+            min-height: 100vh;
+            overflow: hidden; /* Prevent scrolling, show only card slider */
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Doodles */
+        .page-doodle {
+            position: absolute;
+            z-index: -1;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .doodle-1 { top: 15%; left: 5%; width: 50px; fill: none; stroke: #fff; stroke-width: 3; }
+        .doodle-2 { top: 65%; left: 8%; font-size: 50px; color: #fff; transform: rotate(-15deg); }
+        .doodle-3 { top: 25%; right: 8%; width: 60px; fill: none; stroke: #fff; stroke-width: 3; }
+        .doodle-4 { top: 75%; right: 5%; font-size: 60px; color: #fff; transform: rotate(10deg); }
+
+        /* Typography */
+        .kalam { font-family: 'Kalam', cursive; }
+        .caveat { font-family: 'Caveat', cursive; }
+        .bold { font-weight: 700; }
+        .text-xl { font-size: 1.5rem; }
+        .text-2xl { font-size: 2rem; }
+        .text-3xl { font-size: 2.5rem; }
+        .block { display: block; }
+        .mt-2 { margin-top: 0.5rem; }
+
+        /* Slider */
+        .carousel-container {
+            position: relative;
+            width: 100vw;
+            max-width: 1200px;
+            height: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .carousel-track {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 55px; height: 55px;
+            background: #fff;
+            border: none;
+            border-radius: 50%;
+            font-size: 26px;
+            color: #333;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .arrow:hover, .arrow:focus {
+            background: #f0f0f0;
+            transform: translateY(-50%) scale(1.1);
+            outline: none;
+        }
+        .prev-arrow { left: 30px; }
+        .next-arrow { right: 30px; }
+
+        .carousel-dots {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+        .dot {
+            display: inline-block;
+            width: 12px; height: 12px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            margin: 0 6px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .dot.active { background: #fff; transform: scale(1.3); }
+
+        /* Cards */
+        .card-slide {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .card-slide.slide-active {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            z-index: 3;
+            pointer-events: auto;
+        }
+        .card-slide.slide-prev {
+            left: 20%;
+            transform: translate(-50%, -50%) scale(0.85);
+            opacity: 0.6;
+            z-index: 2;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+        .card-slide.slide-next {
+            left: 80%;
+            transform: translate(-50%, -50%) scale(0.85);
+            opacity: 0.6;
+            z-index: 2;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .card-wrapper {
+            position: relative;
+            width: 320px;
+            height: 440px;
+            transform: rotate(var(--rot));
+            transition: transform 0.3s ease;
+            user-select: none;
+        }
+        .card-slide.slide-active .card-wrapper {
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border-radius: 22px;
+        }
+        
+        .card-border {
+            position: absolute;
+            top: 10px; left: 10px;
+            width: 100%; height: 100%;
+            background-color: var(--borderCol);
+            border-radius: 22px;
+            box-shadow: 4px 8px 20px rgba(0,0,0,0.3);
+            z-index: 1;
+        }
+
+        .card {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: var(--paper-color);
+            border-radius: 22px;
+            border: 1px solid rgba(0,0,0,0.05);
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 20px;
+            /* subtle paper texture overlay */
+            background-image: 
+                radial-gradient(circle at 100% 150%, rgba(255,255,255,0.7) 24%, rgba(255,255,255,0) 25%),
+                radial-gradient(circle at 0% 150%, rgba(255,255,255,0.7) 24%, rgba(255,255,255,0) 25%);
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.02);
+            overflow: hidden;
+        }
+
+        /* Card Contents */
+        .speech-bubble {
+            position: absolute;
+            top: 30px; left: 15px;
+            background: #fff;
+            border: 2px solid #333;
+            border-radius: 50% 50% 50% 10%;
+            padding: 12px 16px;
+            font-size: 16px;
+            line-height: 1.1;
+            text-align: center;
+            box-shadow: 2px 3px 0 rgba(0,0,0,0.15);
+            transform: rotate(-8deg);
+            z-index: 10;
+        }
+
+        .chocolate-wrapper {
+            margin-top: 60px;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 5;
+            transition: transform 0.3s;
+        }
+        
+        .chocolate-bar {
+            width: 220px;
+            height: 75px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            font-weight: 900;
+            font-size: 28px;
+            letter-spacing: 1px;
+            box-shadow: 4px 6px 15px rgba(0,0,0,0.3), inset 0 0 12px rgba(255,255,255,0.2);
+            position: relative;
+            transform: rotate(var(--choc-rot));
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        
+        /* Simulated wrapper crinkles */
+        .chocolate-bar::before, .chocolate-bar::after {
+            content: '';
+            position: absolute;
+            width: 15px; height: 100%;
+            background-image: repeating-linear-gradient(to bottom, transparent, transparent 3px, rgba(0,0,0,0.25) 3px, rgba(0,0,0,0.25) 6px);
+        }
+        .chocolate-bar::before { left: 0; }
+        .chocolate-bar::after { right: 0; }
+
+        .card-text {
+            text-align: center;
+            font-size: 1.5rem;
+            line-height: 1.25;
+            color: #222;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 5;
+            padding: 0 10px;
+        }
+
+        /* Specific extra doodles inside cards */
+        .gems-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 4;
+        }
+        .gem-dot {
+            position: absolute;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            box-shadow: inset -2px -2px 5px rgba(0,0,0,0.4), 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        .stars-row {
+            color: #fbbf24;
+            font-size: 35px;
+            letter-spacing: 5px;
+            text-shadow: 1px 1px 0 #ca8a04;
+            margin-top: 10px;
+        }
+
+        /* Lightbox */
+        .lightbox {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .lightbox.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .lightbox-content {
+            transform: scale(0.5);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .lightbox.active .lightbox-content {
+            transform: scale(1.1);
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 25px; right: 35px;
+            font-size: 45px;
+            color: white;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .lightbox-close:hover {
+            transform: scale(1.2);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .card-slide.slide-prev { left: -50%; opacity: 0; }
+            .card-slide.slide-next { left: 150%; opacity: 0; }
+            .card-slide.slide-active { transform: translate(-50%, -50%) scale(0.9); }
+            .carousel-container { height: 480px; }
+            .arrow { width: 45px; height: 45px; font-size: 20px; }
+            .prev-arrow { left: 10px; }
+            .next-arrow { right: 10px; }
+            .lightbox.active .lightbox-content { transform: scale(0.9); }
+        }
+        /* Surprise Popup */
+        .surprise-popup {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+        .surprise-popup.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .surprise-box {
+            background: var(--paper-color);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            transform: scale(0.5);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .surprise-popup.show .surprise-box {
+            transform: scale(1);
+        }
+        .surprise-box h2 {
+            font-family: 'Kalam', cursive;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .surprise-box p {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            color: #555;
+        }
+
+        /* 3D Pop-up Cubes */
+        #cubes-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 150;
+            overflow: hidden;
+        }
+        .cube-wrapper {
+            position: absolute;
+            bottom: -100px;
+            width: 60px; height: 60px;
+            transform-style: preserve-3d;
+            animation: jumpCube var(--dur) ease-out forwards;
+        }
+        .cube-inner {
+            width: 100%; height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: spinCube var(--spin-dur) infinite linear;
+        }
+        .cube-face {
+            position: absolute;
+            width: 100%; height: 100%;
+            background: #fff;
+            border: 2px solid #ccc;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.15);
+            /* Optional: add some folded paper lines or text to look like the image */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .face-front  { transform: translateZ(30px); }
+        .face-back   { transform: rotateY(180deg) translateZ(30px); }
+        .face-right  { transform: rotateY(90deg) translateZ(30px); }
+        .face-left   { transform: rotateY(-90deg) translateZ(30px); }
+        .face-top    { transform: rotateX(90deg) translateZ(30px); }
+        .face-bottom { transform: rotateX(-90deg) translateZ(30px); }
+
+        @keyframes jumpCube {
+            0% {
+                transform: translateY(0) translateX(0) scale(0.2);
+                opacity: 1;
+            }
+            40% {
+                transform: translateY(calc(-70vh - var(--h))) translateX(var(--x)) scale(1.2);
+            }
+            100% {
+                transform: translateY(100vh) translateX(calc(var(--x) * 1.8)) scale(1);
+                opacity: 0;
+            }
+        }
+        @keyframes spinCube {
+            0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+            100% { transform: rotateX(360deg) rotateY(720deg) rotateZ(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Doodles (SVG + Emojis) -->
+    <svg class="page-doodle doodle-1" viewBox="0 0 100 100">
+        <path d="M10,50 Q30,10 50,50 T90,50" />
+        <circle cx="20" cy="30" r="3" fill="#fff"/>
+        <circle cx="80" cy="30" r="3" fill="#fff"/>
+    </svg>
+    <div class="page-doodle doodle-2">A+</div>
+    <svg class="page-doodle doodle-3" viewBox="0 0 100 100">
+        <polygon points="50,10 60,40 90,40 65,60 75,90 50,70 25,90 35,60 10,40 40,40" />
+    </svg>
+    <div class="page-doodle doodle-4">✏️</div>
+    <div class="page-doodle" style="top: 85%; left: 15%; font-size: 40px; color: #fff; transform: rotate(-20deg);">📎</div>
+
+    <!-- Just the Carousel View -->
+    <div class="carousel-container" id="carousel-container">
+        <button class="arrow prev-arrow" onclick="moveCarousel(-1)" aria-label="Previous">&larr;</button>
+        <div class="carousel-track" id="slider-track">
+            <!-- Slides injected by JS -->
+        </div>
+        <button class="arrow next-arrow" onclick="moveCarousel(1)" aria-label="Next">&rarr;</button>
+        
+        <div class="carousel-dots" id="carousel-dots"></div>
+    </div>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox" onclick="if(event.target === this) closeLightbox()">
+        <button class="lightbox-close" aria-label="Close" onclick="closeLightbox()">&times;</button>
+        <div class="lightbox-content" id="lightbox-content"></div>
+    </div>
+
+    <!-- Surprise Popup -->
+    <div id="surprise-popup" class="surprise-popup">
+        <div class="surprise-box">
+            <h2>A Special Surprise! 🎁</h2>
+            <p>Click the button below to open your gift!</p>
+            <button class="btn" style="background-color: var(--primary); padding: 12px 30px; font-size: 1.5rem; font-family: 'Kalam', cursive; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" onclick="window.location.href='cubes.html'">Open Box</button>
+        </div>
+    </div>
+
+    <script>
+        const cardsData = [
+            {
+                id: 1,
+                borderCol: "#1e3a8a",
+                chocName: "PERK",
+                chocBg: "linear-gradient(135deg, #1e40af, #1e3a8a)",
+                chocTextCol: "#fbbf24",
+                chocRot: "-15deg",
+                bubble: "mery<br>teacher",
+                text: "<span class='kalam bold text-xl block'>PERKS</span> of having you as my<br>teacher - PRICELESS",
+                rot: "-1.5deg",
+                extra: ""
+            },
+            {
+                id: 2,
+                borderCol: "#9333ea",
+                chocName: "munch",
+                chocBg: "linear-gradient(135deg, #a855f7, #7e22ce)",
+                chocTextCol: "#facc15",
+                chocRot: "10deg",
+                bubble: "You are<br>the best teacher<br>ever!",
+                text: "THANKS<br>a <span class='kalam bold text-3xl'>munch</span> for<br>EVERYTHING!",
+                rot: "1deg",
+                extra: ""
+            },
+            {
+                id: 3,
+                borderCol: "#1f2937",
+                chocName: "Parle-G",
+                chocBg: "linear-gradient(135deg, #fcd34d, #f59e0b)",
+                chocBorder: "3px solid #b91c1c",
+                chocTextCol: "#b91c1c",
+                chocRot: "-5deg",
+                bubble: "",
+                text: "<span class='kalam bold text-3xl'>G</span> for Genius<br>that's you<br><span class='kalam bold text-2xl mt-2 block'>TEACHER</span>",
+                rot: "0.5deg",
+                extra: ""
+            },
+            {
+                id: 4,
+                borderCol: "#facc15",
+                chocName: "Dairy Milk",
+                chocBg: "linear-gradient(135deg, #581c87, #4c1d95)",
+                chocTextCol: "#fde047",
+                chocRot: "12deg",
+                bubble: "",
+                text: "<span class='kalam bold text-3xl block'>Sweetest</span><span class='kalam text-xl'>TEACHER EVER</span>",
+                rot: "-2deg",
+                extra: "<div class='gems-container'><span style='position:absolute; bottom:20%; left:15%; color:#eab308; font-size:24px;'>★</span><span style='position:absolute; bottom:30%; right:15%; color:#eab308; font-size:18px;'>★</span></div>"
+            },
+            {
+                id: 5,
+                borderCol: "#a78bfa",
+                chocName: "GEMS",
+                chocBg: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+                chocTextCol: "#ffffff",
+                chocRot: "0deg",
+                bubble: "",
+                text: "you are a true <span class='kalam bold text-3xl block'>GEM</span> of a TEACHER!",
+                rot: "1.5deg",
+                extra: `
+                <div class="gems-container">
+                    <div class="gem-dot" style="background:#ef4444; top:25%; left:15%;"></div>
+                    <div class="gem-dot" style="background:#3b82f6; top:35%; right:15%;"></div>
+                    <div class="gem-dot" style="background:#eab308; top:55%; left:10%;"></div>
+                    <div class="gem-dot" style="background:#10b981; top:65%; right:20%;"></div>
+                    <div class="gem-dot" style="background:#a855f7; top:75%; left:25%;"></div>
+                </div>`
+            },
+            {
+                id: 6,
+                borderCol: "#eab308",
+                chocName: "5Star",
+                chocBg: "linear-gradient(135deg, #eab308, #ca8a04)",
+                chocTextCol: "#dc2626",
+                chocRot: "20deg",
+                bubble: "",
+                text: "you deserve a<br>rating<br>for being the<br><span class='kalam bold text-2xl block'>Best TEACHER ever</span>",
+                rot: "-1deg",
+                extra: "<div class='stars-row'>★★★★★</div>"
+            },
+            {
+                id: 7,
+                borderCol: "#dc2626",
+                chocName: "KitKat",
+                chocBg: "linear-gradient(135deg, #ef4444, #b91c1c)",
+                chocTextCol: "#ffffff",
+                chocRot: "-15deg",
+                bubble: "",
+                text: "HAPPY<br><span class='kalam bold text-3xl block'>teachers</span>DAY<br><span class='mt-2 block'>you deserve a sweet Break</span>",
+                rot: "2deg",
+                extra: ""
+            }
+        ];
+
+        let currentIndex = 0;
+        let autoplayInterval;
+
+        // Generate Card HTML template
+        function createCardHTML(card, isInteractive = true) {
+            return `
+                <div class="card-wrapper" style="--rot: ${card.rot}; --borderCol: ${card.borderCol}" id="card-${card.id}" 
+                     ${isInteractive ? `onclick="handleCardClick(${card.id}, this)"` : ''}>
+                    <div class="card-border"></div>
+                    <div class="card">
+                        ${card.bubble ? `<div class="speech-bubble">${card.bubble}</div>` : ''}
+                        
+                        <div class="chocolate-wrapper" style="--choc-rot: ${card.chocRot}">
+                            <div class="chocolate-bar" style="background: ${card.chocBg}; color: ${card.chocTextCol}; ${card.chocBorder ? `border: ${card.chocBorder}` : ''}">
+                                ${card.chocName}
+                            </div>
+                        </div>
+                        
+                        <div class="card-text">${card.text}${card.extra}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize Slider
+        function initSlider() {
+            const track = document.getElementById('slider-track');
+            const dots = document.getElementById('carousel-dots');
+            
+            cardsData.forEach((card, index) => {
+                // Slides
+                const slide = document.createElement('div');
+                slide.className = 'card-slide';
+                slide.dataset.index = index;
+                slide.innerHTML = createCardHTML(card);
+                track.appendChild(slide);
+
+                // Dots
+                const dot = document.createElement('span');
+                dot.className = 'dot';
+                dot.setAttribute('aria-label', `Go to slide ${index + 1}`);
+                dot.onclick = () => goToSlide(index);
+                dots.appendChild(dot);
+            });
+            updateSlider();
+            startAutoplay();
+        }
+
+        // Slider Logic
+        function updateSlider() {
+            const slides = document.querySelectorAll('.card-slide');
+            const dots = document.querySelectorAll('.dot');
+            const total = slides.length;
+
+            slides.forEach((slide, index) => {
+                slide.className = 'card-slide'; // reset classes
+                
+                if (index === currentIndex) {
+                    slide.classList.add('slide-active');
+                } else if (index === (currentIndex - 1 + total) % total) {
+                    slide.classList.add('slide-prev');
+                } else if (index === (currentIndex + 1) % total) {
+                    slide.classList.add('slide-next');
+                }
+            });
+
+            dots.forEach((dot, index) => {
+                dot.className = index === currentIndex ? 'dot active' : 'dot';
+            });
+        }
+
+        function moveCarousel(step) {
+            currentIndex = (currentIndex + step + cardsData.length) % cardsData.length;
+            updateSlider();
+            resetAutoplay();
+        }
+
+        function goToSlide(index) {
+            currentIndex = index;
+            updateSlider();
+            resetAutoplay();
+        }
+
+        // Interaction
+        function handleCardClick(id, element) {
+            const slide = element.parentElement;
+            if (slide.classList.contains('slide-prev')) {
+                moveCarousel(-1);
+            } else if (slide.classList.contains('slide-next')) {
+                moveCarousel(1);
+            } else if (slide.classList.contains('slide-active')) {
+                openLightbox(id, element);
+            }
+        }
+
+        // Lightbox
+        function openLightbox(id, originalElem) {
+            const lightbox = document.getElementById('lightbox');
+            const content = document.getElementById('lightbox-content');
+            
+            const clone = originalElem.cloneNode(true);
+            clone.style.transform = 'scale(1) rotate(0deg)';
+            clone.style.cursor = 'default';
+            
+            content.innerHTML = '';
+            content.appendChild(clone);
+            lightbox.classList.add('active');
+            stopAutoplay();
+        }
+        
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+            startAutoplay();
+        }
+
+        // Swipe Gestures
+        let touchstartX = 0;
+        let touchendX = 0;
+        const sliderContainer = document.getElementById('carousel-container');
+        
+        sliderContainer.addEventListener('touchstart', e => {
+            touchstartX = e.changedTouches[0].screenX;
+        }, {passive: true});
+
+        sliderContainer.addEventListener('touchend', e => {
+            touchendX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, {passive: true});
+
+        function handleSwipe() {
+            const threshold = 50;
+            if (touchendX < touchstartX - threshold) moveCarousel(1);
+            if (touchendX > touchstartX + threshold) moveCarousel(-1);
+        }
+
+        // Keyboard Support
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft') moveCarousel(-1);
+            if (e.key === 'ArrowRight') moveCarousel(1);
+            if (e.key === 'Escape') closeLightbox();
+        });
+
+        // Autoplay
+        function startAutoplay() {
+            if (!autoplayInterval) {
+                autoplayInterval = setInterval(() => moveCarousel(1), 4000);
+            }
+        }
+        function stopAutoplay() {
+            if(autoplayInterval) {
+                clearInterval(autoplayInterval);
+                autoplayInterval = null;
+            }
+        }
+        function resetAutoplay() {
+            stopAutoplay();
+            startAutoplay();
+        }
+
+        // Pause on hover
+        sliderContainer.addEventListener('mouseenter', stopAutoplay);
+        sliderContainer.addEventListener('mouseleave', () => { startAutoplay(); });
+
+        // Surprise Box Logic
+        function triggerCubes() {
+            document.getElementById('surprise-popup').classList.remove('show');
+            
+            const container = document.createElement('div');
+            container.id = 'cubes-container';
+            document.body.appendChild(container);
+            
+            // Generate 35 cubes
+            for(let i=0; i<35; i++) {
+                createCube(container);
+            }
+            
+            // Cleanup after animation
+            setTimeout(() => {
+                container.remove();
+            }, 6000);
+        }
+        
+        function createCube(container) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'cube-wrapper';
+            
+            const left = Math.random() * 100; // 0 to 100vw
+            const xDir = (Math.random() - 0.5) * 600; // Scatter X
+            const hAdd = Math.random() * 400; // Extra jump height
+            const dur = 2.5 + Math.random() * 2; // Jump duration 2.5s to 4.5s
+            const spinDur = 1 + Math.random() * 2; // Spin speed
+            
+            wrapper.style.left = `${left}vw`;
+            wrapper.style.setProperty('--x', `${xDir}px`);
+            wrapper.style.setProperty('--h', `${hAdd}px`);
+            wrapper.style.setProperty('--dur', `${dur}s`);
+            
+            const inner = document.createElement('div');
+            inner.className = 'cube-inner';
+            inner.style.setProperty('--spin-dur', `${spinDur}s`);
+            
+            ['front','back','right','left','top','bottom'].forEach(face => {
+                const div = document.createElement('div');
+                div.className = `cube-face face-${face}`;
+                // Optional faint border or texture on face to look more like paper boxes
+                inner.appendChild(div);
+            });
+            
+            wrapper.appendChild(inner);
+            container.appendChild(wrapper);
+        }
+
+        // Initialization
+        window.onload = () => {
+            initSlider();
+            
+            // Show popup after 6 seconds
+            setTimeout(() => {
+                document.getElementById('surprise-popup').classList.add('show');
+            }, 6000);
+        };
+
+    </script>
+</body>
+</html>
